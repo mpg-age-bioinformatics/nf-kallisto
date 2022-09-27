@@ -1,74 +1,89 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 
-process get_genome { 
+process get_genome {
   stageInMode 'symlink'
   stageOutMode 'move'
 
   script:
     """
-    target_folder=/genomes/${param.organism}/${param.release}/
+    target_folder=/genomes/${params.organism}/${params.release}/
 
-    if [[ ! ${target_folder} ]] ; then mkdir -p ${target_folder} ; fi
+    if [[ ! -e \$target_folder ]] ; then mkdir -p \$target_folder ; fi
 
-    cd ${target_folder}
+    cd \$target_folder
 
     if [[ ! -e ${params.organism}.${params.release}.gtf ]] ; 
       then
-        curl -#O ${params.url_gtf} && gtf=$(basename ${params.url_gtf} ) || gtf=$(curl -#l ${params.url_gtf} | grep gtf | grep -v abinitio) && curl -#O ${params.url_gtf}/$gtf
-        if [[ "$gtf" == *".gz" ]] ; then unpigz $gtf ; gtf=${gtf%.gz} ; fi
-        ln -s $gtf ${params.organism}.${params.release}.gtf
+        curl -#O ${params.url_gtf} && gtf=`basename ${params.url_gtf}` || gtf=`curl -#l ${params.url_gtf} | grep "gtf" | grep -v abinitio` && curl -#O ${params.url_gtf}/\$gtf
+        if [[ "\$gtf" == *".gz" ]] ; then unpigz -p ${task.cpus} \$gtf ; gtf=\${gtf%.gz} ; fi
+        mv \$gtf ${params.organism}.${params.release}.gtf
 
-        grep -v -i 'biotype "rRNA' $gtf | grep -v -i "Mt_rRNA" | grep -v -i srrna > ${params.organism}.${params.release}.no.rRNA.gtf
+        grep -v -i 'biotype "rRNA' ${params.organism}.${params.release}.gtf | grep -v -i "Mt_rRNA" | grep -v -i srrna > ${params.organism}.${params.release}.no.rRNA.gtf
     fi
 
     if [[ ! -e ${params.organism}.${params.release}.fa ]] ; 
       then
-        curl -#O ${params.url_dna} && dna=$(basename ${params.url_dna} ) || dna=""
-        
-        if [[ "$dna" != "" ]] ; 
-          then
-            dna=$(curl -#l ${params.url_dna} | grep .dna.primary_assembly.fa.gz)
+        curl -#O ${params.url_dna} && dna=\$(basename ${params.url_dna} ) || dna=""
+        if [[ ! -f \$dna ]] ;
+          then 
+            dna=\$(curl -#l ${params.url_dna} | grep .dna.toplevel.fa.gz)
+            curl -#O ${params.url_dna}/\$dna
+        fi
+        if [[ "\$dna" == *".gz" ]] ; then unpigz \$dna ; dna=\${dna%.gz} ; fi
+        mv \$dna ${params.organism}.${params.release}.fa
+    fi
+    """
+}
 
-            if [[ "$dna" != "" ]] ; 
-              then
-                dna=$(curl -#l ${params.url_dna} | grep .dna.toplevel.fa.gz)
-            fi
+process writecdna {
+  stageInMode 'symlink'
+  stageOutMode 'move'
 
-            curl -#O ${params.url_dna}/$dna
+  script:
+    """
+    mkdir -p /workdir/kallisto_index
 
-        if [[ "$dna" == *".gz" ]] ; then unpigz $dna ; dna=${dna%.gz} ; fi
-        ln -s $dna ${params.organism}.${params.release}.fa
+    cp /genomes/${params.organism}/${params.release}/${params.organism}.${params.release}.fa /workdir/kallisto_index/${params.organism}.${params.release}.fa
+    cp /genomes/${params.organism}/${params.release}/${params.organism}.${params.release}.no.rRNA.gtf /workdir/kallisto_index/${params.organism}.${params.release}.no.rRNA.gtf
 
+    cd /workdir/kallisto_index
+
+    if [[ "${params.ercc_label}" != "" ]] ; 
+      then 
+        curl -o ${params.ercc_label}.gtf -#O ${params.url_ercc_gtf}
+        curl -o ${params.ercc_label}.fa -#O ${params.url_ercc_fa}
+
+        mv ${params.organism}.${params.release}.no.rRNA.gtf ${params.organism}.${params.release}.no.rRNA.gtf_
+        cat ${params.organism}.${params.release}.no.rRNA.gtf_ ${params.ercc_label}.gtf > ${params.organism}.${params.release}.no.rRNA.gtf
+
+        mv ${params.organism}.${params.release}.fa ${params.organism}.${params.release}.fa_
+        cat ${params.organism}.${params.release}.fa_ ${params.ercc_label}.fa > ${params.organism}.${params.release}.fa
     fi
 
-      # include erccs and first generate ercc_folder fa and gtf to /workdir/kallisto_index
-      # build cufflinks image
-
-      gffread -w ${params.organism}.${params.release}.cdna.fa -g ${params.organism}.${params.release}.fa ${params.organism}.${params.release}.no.rRNA.gtf
+    gffread -w ${params.organism}.${params.release}.cdna.fa -g ${params.organism}.${params.release}.fa ${params.organism}.${params.release}.no.rRNA.gtf
     """
-
 }
 
 process index {
   stageInMode 'symlink'
   stageOutMode 'move'
 
-  input
-    value cdna_fasta
+  input:
+    val cdna_fasta
   
   script:
     """
-    # cp /genomes/${params.organism}.${params.release}/${params.organism}.${params.release}.cdna.fa . 
-    mkdir -p /workdir/kallisto_index
-    cd /workdir/kallisto_index
-    cp $cdna_fasta .
-    kallisto index -i /workdir/kallisto_index/transcripts.norRNA.idx $(basename $cdna_fasta)
+    cd /workdir
+    kallisto index -i transcripts.norRNA.idx $cdna_fasta
     """
 }
 
 workflow {
-    data = channel.fromPath( "${params.fastqc_raw_data}*fastq.gz" )
-    data = data.filter{ ! file("$it".replaceAll(/.fastq.gz/, "_fastqc.html").replace("${params.fastqc_raw_data}", "${params.project_folder}fastqc_output/") ).exists() }
-    index( data )
+    if ( ! file("${params.genomes}${params.organism}/${params.release}/${params.organism}.${params.release}.fa").exists() ) 
+      get_genome()
+    if ( ! file("${params.project_folder}/kallisto_index/${params.organism}.${params.release}.cdna.fa").exists() ) 
+      writecdna()
+    if ( ! file("${params.project_folder}/kallisto_index/transcripts.norRNA.idx").exists() )
+      index("${params.organism}.${params.release}.cdna.fa")
 }
