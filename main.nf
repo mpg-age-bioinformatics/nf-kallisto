@@ -79,11 +79,54 @@ process index {
     """
 }
 
+process unstranded_mapping {
+  stageInMode 'symlink'
+  stageOutMode 'move'
+
+  input:
+    tuple val(pair_id), path(fastq) 
+  
+  script:
+  def single = fastq instanceof Path
+
+  if ( single ) {
+    """
+      mkdir -p /workdir/kallisto_output
+      cd /raw_data
+      zcat ${fastq} | head -n 16000000 > tmp.${pair_id}.fastq
+      kallisto quant -t ${task.cpus} -i /workdir/kallisto_index/transcripts.norRNA.idx --genomebam -g /workdir/kallisto_index/${params.organism}.${params.release}.no.rRNA.gtf -c /workdir/kallisto_index/${chromosomes} -o /workdir/kallisto_output/tmp.${pair_id} -b 100 --single -l 200 -s 30 tmp.${pair_id}.fastq
+      rm -rf tmp.${pair_id}.fastq
+    """
+  } 
+  else { 
+    """
+      mkdir -p /workdir/kallisto_output
+      cd /raw_data
+      zcat ${fastq[0]} | head -n 16000000 > tmp.${pair_id}_1.fastq
+      zcat ${fastq[1]} | head -n 16000000 > tmp.${pair_id}_2.fastq
+
+      kallisto quant -t ${task.cpus} -i /workdir/kallisto_index/transcripts.norRNA.idx --genomebam -g /workdir/kallisto_index/${params.organism}.${params.release}.no.rRNA.gtf -c /workdir/kallisto_index/${chromosomes} -o /workdir/kallisto_output/tmp.${pair_id} -b 100 tmp.${pair_id}_1.fastq tmp.${pair_id}_2.fastq
+      rm -rf tmp.${pair_id}_1.fastq tmp.${pair_id}_2.fastq
+    """
+  }
+
+}
+
 workflow {
     if ( ! file("${params.genomes}${params.organism}/${params.release}/${params.organism}.${params.release}.fa").exists() ) 
       get_genome()
+
     if ( ! file("${params.project_folder}/kallisto_index/${params.organism}.${params.release}.cdna.fa").exists() ) 
       writecdna()
+
     if ( ! file("${params.project_folder}/kallisto_index/transcripts.norRNA.idx").exists() )
       index("${params.organism}.${params.release}.cdna.fa")
+
+    Channel
+        .fromFilePairs( "${params.kallisto_raw_data}/*.READ_{1,2}.fastq.gz", size: -1 )
+        .ifEmpty { error "Cannot find any reads matching: ${params.kallisto_raw_data}/*.READ_{1,2}.fastq.gz" }
+        .set { read_files } 
+
+    if ( ! file("${params.project_folder}/kallisto_output/strandness.txt") )
+      unstranded_mapping(read_files.first())
 }
