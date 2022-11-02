@@ -14,5 +14,5 @@ export JAVA_HOME=$(/usr/libexec/java_home -v 17)
 Edit the contents of `project.config` which maps to `nextflow.config` on each respective nextflow (sub)pipe and run:
 
 ```
-nexflow 1_get_genome
+nextflow 1_get_genome
 ```

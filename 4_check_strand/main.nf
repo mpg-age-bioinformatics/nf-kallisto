@@ -104,16 +104,19 @@ process check_strand {
         print("\\n".join(text))
         sys.stdout.flush()
         strand="--fr-stranded"
+        featurecounts="1"
     elif float(strand["fr-firststrand"]) > 0.6:
         print("fr-firststrand")
         print("\\n".join(text))
         sys.stdout.flush()
         strand="--rf-stranded"
+        featurecounts="2"
     elif ( float(strand["fr-firststrand"]) < 0.6 ) & ( float(strand["fr-secondstrand"]) < 0.6 ):
         print("unstranded")
         print("\\n".join(text))
         sys.stdout.flush()
         strand=""
+        featurecounts="0"
     else:
         print("unable to determine strand")
         print("\\n".join(text))
@@ -121,6 +124,12 @@ process check_strand {
         sys.exit(1)
     with open("/workdir/kallisto_output/.strandness.txt", "w") as out :
         out.write(strand)
+    if not os.path.isdir("/workdir/featureCounts_output/"):
+        os.makedirs("/workdir/featureCounts_output/")
+    with open("/workdir/kallisto_output/.strandness.txt", "w") as out :
+        out.write(strand)
+    with open("/workdir/featureCounts_output/.strandness.txt", "w") as out :
+        out.write(featurecounts)
     """
 }
 
