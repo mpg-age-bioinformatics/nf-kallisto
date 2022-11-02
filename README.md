@@ -1,4 +1,4 @@
-# nf-fastqc
+# nf-kallisto
 
 nextflow differential gene expression pipeline
 
