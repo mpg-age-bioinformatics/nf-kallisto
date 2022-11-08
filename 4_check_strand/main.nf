@@ -93,6 +93,7 @@ process check_strand {
     """
     #!/usr/local/bin/python
     import sys
+    import os
     filein="/workdir/kallisto_output/.infer_experiment.txt"
     text=open(filein, "r").readlines()
     text=[ s.split("\\n")[0] for s in text ]
