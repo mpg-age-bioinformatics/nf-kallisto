@@ -1,12 +1,15 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 
-process writecdna {
+process get_erccs {
   stageInMode 'symlink'
   stageOutMode 'move'
 
+  output:
+    val "completed"
+
   when:
-    ( ! file("${params.project_folder}/kallisto_index/${params.organism}.${params.release}.cdna.fa").exists() ) 
+    ( ! file("${params.project_folder}/kallisto_index/${params.organism}.${params.release}.genome").exists() ) 
 
   script:
     """
@@ -31,12 +34,34 @@ process writecdna {
 
         mv ${params.organism}.${params.release}.fa ${params.organism}.${params.release}.fa_
         cat ${params.organism}.${params.release}.fa_ ${params.ercc_label}.fa > ${params.organism}.${params.release}.fa
+
+        rm ${params.organism}.${params.release}.fa.fai
+        samtools faidx ${params.organism}.${params.release}.fa
+        awk '{print \$1"\t"\$2}' ${params.organism}.${params.release}.fa.fai > ${params.organism}.${params.release}.genome
     fi
+    """
+
+}
+
+process writecdna {
+  stageInMode 'symlink'
+  stageOutMode 'move'
+
+  input:
+    val errcs_output
+
+  when:
+    ( ! file("${params.project_folder}/kallisto_index/${params.organism}.${params.release}.cdna.fa").exists() ) 
+
+  script:
+    """
+    cd /workdir/kallisto_index
 
     gffread -w ${params.organism}.${params.release}.cdna.fa -g ${params.organism}.${params.release}.fa ${params.organism}.${params.release}.no.rRNA.gtf
     """
 }
 
 workflow {
-   writecdna()
+  get_erccs()
+  writecdna(get_erccs.out.collect())
 }
