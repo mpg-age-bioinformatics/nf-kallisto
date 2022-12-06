@@ -1,0 +1,12 @@
+{ 
+  "project_folder" : "~/nf-kallisto-test" ,
+  "kallisto_raw_data" : "~/nf-kallisto-test/raw_data" ,
+  "genomes" : "~/nf-kallisto-test" ,
+  "organism" : "caenorhabditis_elegans" ,
+  "release" : "107" ,
+  "url_gtf" : "ftp://ftp.ensembl.org/pub/release-107/gtf/caenorhabditis_elegans/" ,
+  "url_dna" : "ftp://ftp.ensembl.org/pub/release-107/fasta/caenorhabditis_elegans/dna/" ,
+  "ercc_label" : "ercc92" ,
+  "url_ercc_gtf" : "https://datashare.mpcdf.mpg.de/s/MOxbNrXeBNcg9wt/download" ,
+  "url_ercc_fa" : "https://datashare.mpcdf.mpg.de/s/H9PQu3vDRi9saqV/download"
+}

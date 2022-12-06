@@ -111,7 +111,7 @@ process writecdna {
 }
 
 
-process index {
+process indexer {
   stageInMode 'symlink'
   stageOutMode 'move'
 
@@ -311,20 +311,24 @@ process flagstat {
 }
 
 workflow get_genome {
-  genome_collector()
+  main:
+    genome_collector()
 }
 
 workflow write_cdna {
-  get_erccs()
-  writecdna(get_erccs.out.collect())
+  main:
+    get_erccs()
+    writecdna(get_erccs.out.collect())
 }
 
-workflow wf_index {
-  index()
+workflow index {
+  main:
+    indexer()
 }
 
 workflow check_strand {
-  if ( ! file("${params.project_folder}/kallisto_output/.strandness.txt").exists() ) {
+  main:
+    if ( ! file("${params.project_folder}/kallisto_output/.strandness.txt").exists() ) {
     Channel
       .fromFilePairs( "${params.kallisto_raw_data}/*.READ_{1,2}.fastq.gz", size: -1 )
       .ifEmpty { error "Cannot find any reads matching: ${params.kallisto_raw_data}/*.READ_{1,2}.fastq.gz" }
@@ -336,14 +340,13 @@ workflow check_strand {
   }
 }
 
-workflow map {
-  // Channel
-  //   .fromFilePairs( "${params.kallisto_raw_data}*.READ_{1,2}.fastq.gz", size: -1 )
-  //   .ifEmpty { error "Cannot find any reads matching: ${params.kallisto_raw_data}*.READ_{1,2}.fastq.gz" }
-  //   .set { read_files } 
-  read_files=Channel.fromFilePairs( "${params.kallisto_raw_data}*.READ_{1,2}.fastq.gz", size: -1 )
-  mapping( read_files )
-  flagstat( mapping.out.collect(), read_files )
+workflow map_reads {
+  main:
+    // Channel
+    //   .fromFilePairs( "${params.kallisto_raw_data}*.READ_{1,2}.fastq.gz", size: -1 )
+    //   .ifEmpty { error "Cannot find any reads matching: ${params.kallisto_raw_data}*.READ_{1,2}.fastq.gz" }
+    //   .set { read_files } 
+    read_files=Channel.fromFilePairs( "${params.kallisto_raw_data}*.READ_{1,2}.fastq.gz", size: -1 )
+    mapping( read_files )
+    flagstat( mapping.out.collect(), read_files )
 }
-
-
