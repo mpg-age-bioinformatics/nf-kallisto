@@ -13,6 +13,7 @@ export JAVA_HOME=$(/usr/libexec/java_home -v 17)
 
 Edit the contents of `project.config` which maps to `nextflow.config` on each respective nextflow (sub)pipe and run:
 
+eg.
 ```
-nextflow 1_get_genome
+nextflow run nf-kallisto -entry write_cdna --includeConfig local.config
 ```
