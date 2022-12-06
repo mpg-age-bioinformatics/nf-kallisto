@@ -37,7 +37,7 @@ nextflow run mpg-age-bioinformatics/nf-kallisto -r ${RELEASE} -params-file param
 
 ## Contributing
 
-Make a commig, check the last tag, add a new one, push it and make a release|:
+Make a commit, check the last tag, add a new one, push it and make a release|:
 ```
 git add -A . && git commit -m "<message>" && git push
 git describe --abbrev=0 --tags
