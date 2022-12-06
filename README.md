@@ -25,9 +25,23 @@ curl -J -O https://raw.githubusercontent.com/mpg-age-bioinformatics/nf-kallisto/
 
 Run the workflow:
 ```
-nextflow run mpg-age-bioinformatics/nf-kallisto -params-file params.json -entry get_genome -profile local && \
-nextflow run mpg-age-bioinformatics/nf-kallisto -params-file params.json -entry write_cdna -profile local && \
-nextflow run mpg-age-bioinformatics/nf-kallisto -params-file params.json -entry index -profile local && \
-nextflow run mpg-age-bioinformatics/nf-kallisto -params-file params.json -entry check_strand -profile local && \
-nextflow run mpg-age-bioinformatics/nf-kallisto -params-file params.json -entry map_reads -profile local
+RELEASE=1.0.0
+nextflow run mpg-age-bioinformatics/nf-kallisto -r ${RELEASE} -params-file params.json -entry images -profile local && \
+nextflow run mpg-age-bioinformatics/nf-kallisto -r ${RELEASE} -params-file params.json -entry get_genome -profile local && \
+nextflow run mpg-age-bioinformatics/nf-kallisto -r ${RELEASE} -params-file params.json -entry write_cdna -profile local && \
+nextflow run mpg-age-bioinformatics/nf-kallisto -r ${RELEASE} -params-file params.json -entry index -profile local && \
+nextflow run mpg-age-bioinformatics/nf-kallisto -r ${RELEASE} -params-file params.json -entry check_strand -profile local && \
+nextflow run mpg-age-bioinformatics/nf-kallisto -r ${RELEASE} -params-file params.json -entry map_reads -profile local
+```
+
+
+## Contributing
+
+Check the last tag, add a new one, push it and make a release|:
+```
+git describe --abbrev=0 --tags
+git tag -e -a <tag> HEAD
+git push
+git push origin --tags
+gh release create <tag> 
 ```

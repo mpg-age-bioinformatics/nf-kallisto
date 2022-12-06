@@ -1,6 +1,56 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 
+process get_images {
+  stageInMode 'symlink'
+  stageOutMode 'move'
+
+  script:
+    """
+
+    if [[ "${params.run_type}" == "r2d2" ]] || [[ "${params.run_type}" == "raven" ]] ; 
+
+      then
+
+        cd ${params.image_folder}
+
+        if [[ ! -f samtools-1.16.1.sif ]] ;
+          then
+            singularity pull samtools-1.16.1.sif docker://index.docker.io/mpgagebioinformatics/samtools:1.16.1
+        fi
+
+        if [[ ! -f cufflinks-2.2.1.sif ]] ;
+          then
+            singularity pull cufflinks-2.2.1.sif docker://index.docker.io/mpgagebioinformatics/cufflinks:2.2.1
+        fi
+
+        if [[ ! -f kallisto-0.48.0.sif ]] ;
+          then
+            singularity pull kallisto-0.48.0.sif docker://index.docker.io/mpgagebioinformatics/kallisto:0.48.0
+        fi
+
+        if [[ ! -f rseqc-5.0.1.sif ]] ;
+          then
+            singularity pull rseqc-0.48.0.sif docker://index.docker.io/mpgagebioinformatics/rseqc:5.0.1
+        fi
+    fi
+
+
+    if [[ "${params.run_type}" == "local" ]] ; 
+
+      then
+
+        docker pull mpgagebioinformatics/samtools:1.16.1
+        docker pull mpgagebioinformatics/cufflinks:2.2.1
+        docker pull mpgagebioinformatics/kallisto:0.48.0
+        docker pull mpgagebioinformatics/rseqc:5.0.1
+
+    fi
+
+    """
+
+}
+
 process genome_collector {
   stageInMode 'symlink'
   stageOutMode 'move'
@@ -308,6 +358,11 @@ process flagstat {
     cd /workdir/kallisto_output/${pair_id}
     samtools flagstat pseudoalignments.bam > flagstats.txt
     """
+}
+
+workflow images {
+  main:
+    get_images()
 }
 
 workflow get_genome {
