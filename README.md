@@ -17,7 +17,7 @@ curl -J -O https://datashare.mpcdf.mpg.de/s/ZlM0lWKPh8KrP6B/download
 curl -J -O https://datashare.mpcdf.mpg.de/s/o3O6BKaEXqB7TTo/download
 ```
 
-Download the paramaters files:
+Download the paramaters file:
 ```
 cd ~/nf-kallisto-test
 curl -J -O https://raw.githubusercontent.com/mpg-age-bioinformatics/nf-kallisto/main/params.json
