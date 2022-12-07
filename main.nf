@@ -31,7 +31,7 @@ process get_images {
 
         if [[ ! -f rseqc-5.0.1.sif ]] ;
           then
-            singularity pull rseqc-0.48.0.sif docker://index.docker.io/mpgagebioinformatics/rseqc:5.0.1
+            singularity pull rseqc-5.0.1.sif docker://index.docker.io/mpgagebioinformatics/rseqc:5.0.1
         fi
     fi
 
