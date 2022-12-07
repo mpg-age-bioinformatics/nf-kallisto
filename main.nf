@@ -134,7 +134,7 @@ process get_erccs {
         mv ${params.organism}.${params.release}.fa ${params.organism}.${params.release}.fa_
         cat ${params.organism}.${params.release}.fa_ ${params.ercc_label}.fa > ${params.organism}.${params.release}.fa
 
-        rm ${params.organism}.${params.release}.fa.fai
+        rm -rf ${params.organism}.${params.release}.fa.fai
         samtools faidx ${params.organism}.${params.release}.fa
         awk '{print \$1"\t"\$2}' ${params.organism}.${params.release}.fa.fai > ${params.organism}.${params.release}.genome
     fi
