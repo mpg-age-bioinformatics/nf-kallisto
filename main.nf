@@ -320,7 +320,7 @@ process mapping {
     val pair_id
 
   when:
-    ( ! file("${params.project_folder}/${pair_id}/pseudoalignments.bam").exists() ) 
+    ( ! file("${params.project_folder}/kallisto_output/${pair_id}/pseudoalignments.bam").exists() ) 
   
   script:
   def single = fastq instanceof Path
