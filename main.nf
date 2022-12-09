@@ -59,7 +59,7 @@ process genome_collector {
     val "finished", emit: get_genome_status
 
   when:
-    ( ! file("${params.genomes}${params.organism}/${params.release}/${params.organism}.${params.release}.genome").exists() )
+    ( ! file("${params.genomes}/${params.organism}/${params.release}/${params.organism}.${params.release}.genome").exists() )
   
   script:
     """
