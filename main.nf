@@ -71,7 +71,7 @@ process genome_collector {
 
     if [[ ! -e ${params.organism}.${params.release}.gtf ]] ; 
       then
-        curl -#O ${params.url_gtf} && gtf=`basename ${params.url_gtf}` || gtf=`curl -#l ${params.url_gtf} | grep "gtf" | grep -v abinitio` && curl -#O ${params.url_gtf}/\$gtf
+        curl -#O ${params.url_gtf} && gtf=`basename ${params.url_gtf}` || gtf=`curl -#l ${params.url_gtf} | grep "gtf" | grep -v abinitio | grep -v chr` && curl -#O ${params.url_gtf}/\$gtf
         if [[ "\$gtf" == *".gz" ]] ; then unpigz -p ${task.cpus} \$gtf ; gtf=\${gtf%.gz} ; fi
         mv \$gtf ${params.organism}.${params.release}.gtf
 
