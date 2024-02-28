@@ -330,7 +330,7 @@ process mapping {
       mkdir -p /workdir/kallisto_output
       cd /raw_data
       strand=\$(cat /workdir/kallisto_output/.strandness.txt)
-      kallisto quant -t ${task.cpus} -i /workdir/kallisto_index/transcripts.norRNA.idx --genomebam -g /workdir/kallisto_index/${params.organism}.${params.release}.no.rRNA.gtf -c /workdir/kallisto_index/${params.organism}.${params.release}.genome -o /workdir/kallisto_output/${pair_id} -b 100 --single -l 200 -s 30 ${pair_id}.READ_1.fastq.gz
+      kallisto quant -t ${task.cpus} -i /workdir/kallisto_index/transcripts.norRNA.idx \${strand} --genomebam -g /workdir/kallisto_index/${params.organism}.${params.release}.no.rRNA.gtf -c /workdir/kallisto_index/${params.organism}.${params.release}.genome -o /workdir/kallisto_output/${pair_id} -b 100 --single -l 200 -s 30 ${pair_id}.READ_1.fastq.gz
     """
   } 
   else { 
@@ -338,7 +338,7 @@ process mapping {
       mkdir -p /workdir/kallisto_output
       cd /raw_data
       strand=\$(cat /workdir/kallisto_output/.strandness.txt)
-      kallisto quant -t ${task.cpus} -i /workdir/kallisto_index/transcripts.norRNA.idx --genomebam -g /workdir/kallisto_index/${params.organism}.${params.release}.no.rRNA.gtf -c /workdir/kallisto_index/${params.organism}.${params.release}.genome -o /workdir/kallisto_output/${pair_id} -b 100 ${pair_id}.READ_1.fastq.gz ${pair_id}.READ_2.fastq.gz
+      kallisto quant -t ${task.cpus} -i /workdir/kallisto_index/transcripts.norRNA.idx \${strand} --genomebam -g /workdir/kallisto_index/${params.organism}.${params.release}.no.rRNA.gtf -c /workdir/kallisto_index/${params.organism}.${params.release}.genome -o /workdir/kallisto_output/${pair_id} -b 100 ${pair_id}.READ_1.fastq.gz ${pair_id}.READ_2.fastq.gz
     """
   }
 
