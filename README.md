@@ -27,12 +27,12 @@ Run the workflow:
 ```
 RELEASE=1.0.0
 PROFILE=local
-nextflow run mpg-age-bioinformatics/nf-kallisto -r ${RELEASE} -params-file params.json -entry images -profile ${PROFILE} && \
-nextflow run mpg-age-bioinformatics/nf-kallisto -r ${RELEASE} -params-file params.json -entry get_genome -profile ${PROFILE} && \
-nextflow run mpg-age-bioinformatics/nf-kallisto -r ${RELEASE} -params-file params.json -entry write_cdna -profile ${PROFILE} && \
-nextflow run mpg-age-bioinformatics/nf-kallisto -r ${RELEASE} -params-file params.json -entry index -profile ${PROFILE} && \
-nextflow run mpg-age-bioinformatics/nf-kallisto -r ${RELEASE} -params-file params.json -entry check_strand -profile ${PROFILE} && \
-nextflow run mpg-age-bioinformatics/nf-kallisto -r ${RELEASE} -params-file params.json -entry map_reads -profile ${PROFILE}
+nextflow run mpg-age-bioinformatics/nf-kallisto -r ${RELEASE} -params-file params.json -entry images -profile ${PROFILE} --user "$(id -u):$(id -g) && \
+nextflow run mpg-age-bioinformatics/nf-kallisto -r ${RELEASE} -params-file params.json -entry get_genome -profile ${PROFILE} --user "$(id -u):$(id -g) && \
+nextflow run mpg-age-bioinformatics/nf-kallisto -r ${RELEASE} -params-file params.json -entry write_cdna -profile ${PROFILE} --user "$(id -u):$(id -g) && \
+nextflow run mpg-age-bioinformatics/nf-kallisto -r ${RELEASE} -params-file params.json -entry index -profile ${PROFILE} --user "$(id -u):$(id -g) && \
+nextflow run mpg-age-bioinformatics/nf-kallisto -r ${RELEASE} -params-file params.json -entry check_strand -profile ${PROFILE} --user "$(id -u):$(id -g) && \
+nextflow run mpg-age-bioinformatics/nf-kallisto -r ${RELEASE} -params-file params.json -entry map_reads -profile ${PROFILE} --user "$(id -u):$(id -g)
 ```
 
 ___
