@@ -78,6 +78,7 @@ process genome_collector {
     fi
 
     if [[ ! -e ${params.organism}.${params.release}.no.rRNA.gtf ]] ; 
+      then
 
         grep -v -i 'biotype "rRNA' ${params.organism}.${params.release}.gtf | grep -v -i "Mt_rRNA" | grep -v -i srrna > ${params.organism}.${params.release}.no.rRNA.gtf
 
